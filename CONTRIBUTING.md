@@ -74,9 +74,8 @@ flowchart LR
 - **Runner**: ubuntu-latest
 - **Java**: JDK 25 (Temurin)
 - **Cache**: Maven dependencies for faster builds
-- **Command**: `./mvnw verify` (compile + test + SpotBugs + JaCoCo)
+- **Command**: `./mvnw verify` (compile + test + SpotBugs)
 - **Job name**: `build` (referenced in branch protection rules)
-- **Artifacts**: JaCoCo coverage report (7-day retention)
 
 ### Security Scanning (`codeql.yml`)
 
