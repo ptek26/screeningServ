@@ -88,12 +88,14 @@ flowchart LR
 - **Command**: `./mvnw verify` (compile + test + SpotBugs)
 - **Job name**: `build` (referenced in branch protection rules)
 
-### Security Scanning (`codeql.yml`)
+### Code Quality (`sonarcloud.yml`)
 
-- **Triggers**: Push/PR to develop/main, weekly schedule
-- **Language**: Java/Kotlin
-- **Purpose**: Detects security vulnerabilities and coding errors
+SonarCloud analysis for code quality and security:
+
+- **Triggers**: Push/PR to develop/main
+- **Analysis**: Bugs, vulnerabilities, code smells, coverage
 - **Free for**: Public repositories
+- **Dashboard**: https://sonarcloud.io/project/overview?id=ptek26_screeningServ
 
 ### Dependency Updates (Dependabot)
 
