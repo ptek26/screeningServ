@@ -68,14 +68,29 @@ flowchart LR
 
 ## CI Pipeline
 
-Defined in `.github/workflows/ci.yml`:
+### Build & Test (`ci.yml`)
 
 - **Triggers**: PR to develop/main, push to develop
 - **Runner**: ubuntu-latest
 - **Java**: JDK 25 (Temurin)
 - **Cache**: Maven dependencies for faster builds
-- **Command**: `./mvnw verify` (compile + test + integration test)
+- **Command**: `./mvnw verify` (compile + test + SpotBugs + JaCoCo)
 - **Job name**: `build` (referenced in branch protection rules)
+- **Artifacts**: JaCoCo coverage report (7-day retention)
+
+### Security Scanning (`codeql.yml`)
+
+- **Triggers**: Push/PR to develop/main, weekly schedule
+- **Language**: Java/Kotlin
+- **Purpose**: Detects security vulnerabilities and coding errors
+- **Free for**: Public repositories
+
+### Dependency Updates (Dependabot)
+
+- **Maven deps**: Weekly checks on Mondays at 06:00 UTC
+- **GitHub Actions**: Weekly checks on Mondays at 06:00 UTC
+- **Auto-creates PRs** for dependency updates
+- **Labels**: `dependencies` for tracking
 
 ## Release Process
 
