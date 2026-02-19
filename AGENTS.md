@@ -56,6 +56,24 @@ Examples:
 - [ ] Commit message follows conventional format
 - [ ] Changes are on a feature branch (not `develop` or `main`)
 
+## Agent Constraints
+
+**AI agents must NEVER:**
+- Merge PRs (requires human approval)
+- Approve PRs
+- Force push to any branch
+- Push directly to `develop` or `main`
+
+**Agent workflow stops at:**
+1. Create feature branch ✅
+2. Make changes ✅
+3. Push feature branch ✅
+4. Create PR ✅
+5. Report PR URL and status ✅
+6. **STOP** — Wait for human to review, approve, and merge
+
+All merges require human-in-the-loop (HITL) review.
+
 ## Branch Workflow
 
 1. Create feature branch from `develop`
@@ -63,7 +81,7 @@ Examples:
 3. Push feature branch
 4. Create PR to `develop`
 5. Wait for CI to pass
-6. Get approval
-7. Merge
+6. **STOP** — Report PR URL to user
+7. User reviews, approves, and merges
 
 See `CONTRIBUTING.md` for detailed workflow.
