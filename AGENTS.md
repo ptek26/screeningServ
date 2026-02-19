@@ -74,6 +74,29 @@ Examples:
 
 All merges require human-in-the-loop (HITL) review.
 
+## Before Making Changes
+
+**CRITICAL:** Do not push changes without confidence they will work.
+
+1. **Understand the problem fully** - Read logs, understand root cause
+2. **Research the solution** - Check documentation, existing patterns, best practices
+3. **Validate locally if possible** - Run tests, lint, build with `./mvnw verify`
+4. **Consider edge cases** - What could go wrong? What dependencies exist?
+5. **Plan before implementing** - Document the plan, identify all affected files
+6. **One change at a time** - Don't batch unrelated fixes
+7. **Verify CI passes** - All checks must pass before requesting merge
+
+**Time and resources are valuable.** Avoid "try and see" approaches. Each failed CI run costs time and consumes resources.
+
+### Planning Checklist
+
+Before starting implementation:
+- [ ] Problem is clearly understood and documented
+- [ ] Solution approach is validated (documentation, similar implementations)
+- [ ] All affected files identified
+- [ ] Edge cases considered
+- [ ] Documentation updates planned
+
 ## Branch Workflow
 
 1. Create feature branch from `develop`

@@ -137,12 +137,28 @@ The workflow will:
 
 ### Manual Approval
 
-Releases require approval via the `release` GitHub Environment. When a release is pending:
+Releases require approval via the `release` GitHub Environment:
 
 1. Go to **Actions** → find the running Release workflow
 2. Click **Review deployments**
 3. Select the `release` environment
 4. Add comments (optional) and click **Approve** or **Reject**
+
+This approval gate replaces the need for PR approvals on `main` for releases.
+
+### Branch Protection on Main
+
+The `main` branch has relaxed PR requirements for releases:
+
+| Protection | Status |
+|------------|--------|
+| Require PR before merging | ❌ Disabled (releases push directly) |
+| Require linear history | ✅ Enabled |
+| Require status checks | ✅ Enabled (`build`) |
+| Block force pushes | ✅ Enabled |
+| Block deletions | ✅ Enabled |
+
+**Why no PR requirement?** The `release` environment approval provides the human-in-the-loop gate. CI still validates all code before and after release.
 
 ### Security Scan
 
