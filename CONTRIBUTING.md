@@ -9,7 +9,9 @@ We use a three-tier branching model:
 - `feature/*` - Feature branches. Can be pushed to directly.
 
 ```mermaid
-feature/* --PR (CI must pass)--> develop --Release workflow--> main
+flowchart LR
+    A[feature/*] -->|PR - CI must pass| B[develop]
+    B -->|Release workflow| C[main]
 ```
 
 ## Branch Protection Rules
@@ -27,7 +29,7 @@ feature/* --PR (CI must pass)--> develop --Release workflow--> main
 
 - Requires PR before merging
 - Requires `build` status check to pass
-- 0 approvals required (self-merge after CI passes)
+- Requires 1 approval (CI must pass before approval is possible)
 - No force pushes
 - No deletions
 
@@ -56,9 +58,13 @@ feature/* --PR (CI must pass)--> develop --Release workflow--> main
 
 5. Wait for CI to pass (Maven build + test)
 
-6. Merge the PR (squash merge recommended)
+   Note: CI must pass before a PR can be approved or merged. This ensures only tested code gets reviewed.
 
-7. Branch auto-deletes after merge
+6. Request review and get approval (required for all PRs)
+
+7. Merge the PR (squash merge recommended)
+
+8. Branch auto-deletes after merge
 
 ## CI Pipeline
 
