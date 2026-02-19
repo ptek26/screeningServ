@@ -1,5 +1,7 @@
 # Contributing to screeningServ
 
+> 📖 See [AGENTS.md](AGENTS.md) for pre-commit guidelines and local testing requirements.
+
 ## Branching Strategy
 
 We use a three-tier branching model:
@@ -44,27 +46,36 @@ flowchart LR
    git checkout develop && git pull && git checkout -b feature/my-feature
    ```
 
-2. Make changes and commit
+2. Make changes
 
-3. Push feature branch:
+3. **Test locally before pushing:**
+   ```bash
+   ./mvnw verify
+   ```
+   
+   > ⚠️ **Do not push if this fails.** Fix all issues first. See `AGENTS.md` for pre-commit guidelines.
+
+4. Commit with meaningful message (see `AGENTS.md` for conventions)
+
+5. Push feature branch:
    ```bash
    git push -u origin feature/my-feature
    ```
 
-4. Create PR to develop:
+6. Create PR to develop:
    ```bash
    gh pr create --base develop
    ```
 
-5. Wait for CI to pass (Maven build + test)
+7. Wait for CI to pass (Maven build + test)
 
    Note: CI must pass before a PR can be approved or merged. This ensures only tested code gets reviewed.
 
-6. Request review and get approval (required for all PRs)
+8. Request review and get approval (required for all PRs)
 
-7. Merge the PR (squash merge recommended)
+9. Merge the PR (squash merge recommended)
 
-8. Branch auto-deletes after merge
+10. Branch auto-deletes after merge
 
 ## CI Pipeline
 
