@@ -109,8 +109,8 @@ Runs before every release to production:
 - **Triggers**: Called by Release workflow
 - **Jobs**:
   - `build-and-test`: Maven verify (compile + test + SpotBugs)
-  - `security-scan`: OWASP Dependency Check (vulnerabilities with CVSS ≥ 7 fail)
-- **Artifacts**: OWASP HTML report (7-day retention)
+  - `security-scan`: Trivy vulnerability scanner (CRITICAL/HIGH fails)
+- **Fast**: Completes in ~2-3 minutes
 
 ## Release Process
 
@@ -142,13 +142,14 @@ Releases require approval via the `release` GitHub Environment. When a release i
 3. Select the `release` environment
 4. Add comments (optional) and click **Approve** or **Reject**
 
-### OWASP Security Scan
+### Security Scan
 
-The release CI includes an OWASP Dependency Check that scans for known vulnerabilities:
+Trivy scans dependencies for known vulnerabilities (CVEs):
 
-- Fails on CVSS score ≥ 7 (high/critical vulnerabilities)
-- Reports are uploaded as artifacts for review
-- False positives can be suppressed in `dependency-check-suppressions.xml`
+- Fails on CRITICAL or HIGH severity issues
+- Scans filesystem including dependencies
+- Fast execution (~30-60 seconds)
+- Free for public repositories
 
 ### Release Branches
 
