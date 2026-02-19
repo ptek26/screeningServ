@@ -77,8 +77,8 @@ jobs:
             exit 1
           fi
           
-          # Merge develop into main
-          git merge develop --no-ff -m "chore: release v$VERSION"
+          # Merge develop into main (fast-forward for linear history)
+          git merge develop --ff-only
           git push origin main
           
           echo "::notice::Merged develop into main for v$VERSION"
