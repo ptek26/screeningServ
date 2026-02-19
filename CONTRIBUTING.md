@@ -102,23 +102,65 @@ flowchart LR
 - **Auto-creates PRs** for dependency updates
 - **Labels**: `dependencies` for tracking
 
+### Release CI (`release-ci.yml`)
+
+Runs before every release to production:
+
+- **Triggers**: Called by Release workflow
+- **Jobs**:
+  - `build-and-test`: Maven verify (compile + test + SpotBugs)
+  - `security-scan`: OWASP Dependency Check (vulnerabilities with CVSS ≥ 7 fail)
+- **Artifacts**: OWASP HTML report (7-day retention)
+
 ## Release Process
 
-### Manual Release
+### Prerequisites
+
+- All features merged to `develop`
+- QA completed on `develop`
+- CI passing on `develop`
+
+### Release Steps
 
 1. Go to **Actions** → **Release** → **Run workflow**
-2. Enter version number (semver: X.Y.Z)
-3. Optionally enable dry-run to create PR without auto-merge
-4. Workflow creates `release/vX.Y.Z` branch from develop
-5. Creates PR from release branch to main
-6. Enables auto-merge (waits for CI to pass)
-7. Once merged, `release-tag.yml` automatically:
-   - Creates git tag `vX.Y.Z`
-   - Creates GitHub Release with auto-generated notes
+2. Enter version number (semver: X.Y.Z, e.g., `1.0.0`)
+3. Click **Run workflow**
+
+The workflow will:
+
+1. Validate version format
+2. Run Release CI (build + test + OWASP security scan)
+3. **Pause for manual approval** (GitHub Environment)
+4. After approval: merge `develop` → `main`, create tag, publish GitHub Release
+
+### Manual Approval
+
+Releases require approval via the `release` GitHub Environment. When a release is pending:
+
+1. Go to **Actions** → find the running Release workflow
+2. Click **Review deployments**
+3. Select the `release` environment
+4. Add comments (optional) and click **Approve** or **Reject**
+
+### OWASP Security Scan
+
+The release CI includes an OWASP Dependency Check that scans for known vulnerabilities:
+
+- Fails on CVSS score ≥ 7 (high/critical vulnerabilities)
+- Reports are uploaded as artifacts for review
+- False positives can be suppressed in `dependency-check-suppressions.xml`
+
+### Release Branches
+
+Releases do NOT create separate branches. The workflow:
+
+- Merges `develop` directly into `main` (merge commit)
+- Creates a tag on `main` (e.g., `v1.0.0`)
+- Creates a GitHub Release with auto-generated notes
 
 ### Dry Run
 
-Set `dry_run: true` to test the release process without auto-merging. This creates the release PR but requires manual merge approval.
+There is no dry-run mode. Test changes thoroughly on `develop` before triggering a release.
 
 ## Repository Settings
 

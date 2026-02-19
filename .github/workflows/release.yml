@@ -7,71 +7,96 @@ on:
         description: "Release version (e.g. 1.0.0)"
         required: true
         type: string
-      dry_run:
-        description: "Dry run — create PR but don't auto-merge"
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
-  release:
-    name: release
+  validate:
+    name: Validate Version
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.validate.outputs.version }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Validate version
+      - name: Validate version format
+        id: validate
         run: |
-          if ! echo "${{ inputs.version }}" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-            echo "::error::Invalid version '${{ inputs.version }}'. Must match semver pattern (e.g. 1.0.0)"
+          VERSION="${{ inputs.version }}"
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Invalid version '$VERSION'. Must match semver pattern (e.g. 1.0.0)"
             exit 1
           fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "::notice::Version validated: v$VERSION"
+
+  release-ci:
+    name: Release CI
+    needs: validate
+    uses: ./.github/workflows/release-ci.yml
+    with:
+      version: ${{ needs.validate.outputs.version }}
+
+  approval:
+    name: Manual Approval
+    needs: release-ci
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - name: Approval gate passed
+        run: |
+          echo "::notice::Release v${{ needs.validate.outputs.version }} approved by reviewer"
+
+  release:
+    name: Create Release
+    needs: [validate, approval]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Create release branch
+      - name: Merge develop into main
         run: |
-          git checkout develop
-          git pull origin develop
-          git checkout -b release/v${{ inputs.version }}
-          git push origin release/v${{ inputs.version }}
+          VERSION="${{ needs.validate.outputs.version }}"
+          
+          # Checkout main and ensure it's up to date
+          git checkout main
+          git pull origin main
+          
+          # Check if develop has new commits
+          BEHIND=$(git rev-list --count main..develop)
+          if [ "$BEHIND" -eq 0 ]; then
+            echo "::error::develop has no new commits to release"
+            exit 1
+          fi
+          
+          # Merge develop into main
+          git merge develop --no-ff -m "chore: release v$VERSION"
+          git push origin main
+          
+          echo "::notice::Merged develop into main for v$VERSION"
 
-      - name: Ensure release label exists
-        run: gh label create release --color 0E8A16 --description "Release PR" || true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create pull request
-        id: create-pr
+      - name: Create tag
         run: |
-          PR_URL=$(gh pr create \
-            --base main \
-            --head release/v${{ inputs.version }} \
-            --title "Release v${{ inputs.version }}" \
-            --body "## Release v${{ inputs.version }}
+          VERSION="${{ needs.validate.outputs.version }}"
+          git tag -a "v$VERSION" -m "Release v$VERSION"
+          git push origin "v$VERSION"
+          echo "::notice::Created tag v$VERSION"
 
-          Automated release PR from \`develop\` → \`main\`.
-
-          Triggered by: @${{ github.actor }}" \
-            --label release)
-          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Enable auto-merge
-        if: inputs.dry_run == false
+      - name: Create GitHub Release
         run: |
-          gh pr merge --auto --squash "${{ steps.create-pr.outputs.pr_url }}"
-          echo "::notice::PR created and auto-merge enabled. Tag will be created automatically when the PR merges."
+          VERSION="${{ needs.validate.outputs.version }}"
+          gh release create "v$VERSION" \
+            --target main \
+            --title "v$VERSION" \
+            --generate-notes
+          echo "::notice::Created GitHub Release v$VERSION"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
